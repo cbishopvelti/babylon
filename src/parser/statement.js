@@ -731,7 +731,6 @@ export default class StatementParser extends ExpressionParser {
       const decl = this.startNode();
       this.parseVarHead(decl);
       if (this.eat(tt.eq)) {
-        console.log("701")
         decl.init = this.parseMaybeAssign(isFor);
       } else {
         if (

@@ -37,8 +37,6 @@ export default class Parser extends StatementParser {
 
     const out = this.parseTopLevel(file, program);
 
-    console.log("out 500", out);
-
     return out;
   }
 }
