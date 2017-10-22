@@ -595,6 +595,8 @@ export default class Tokenizer extends LocationParser {
   }
 
   getTokenFromCode(code: number): void {
+    console.log("code", String.fromCharCode(code), code);
+    // console.trace();
     switch (code) {
       case 35: // '#'
         if (
@@ -623,6 +625,11 @@ export default class Tokenizer extends LocationParser {
       case 40:
         ++this.state.pos;
         this.finishToken(tt.parenL);
+        return;
+
+      case 36:
+        ++this.state.pos;
+        this.finishToken(tt.dollarL);
         return;
       case 41:
         ++this.state.pos;
@@ -782,6 +789,7 @@ export default class Tokenizer extends LocationParser {
   }
 
   readRegexp(): void {
+    console.log("readRegexp")
     const start = this.state.pos;
     let escaped, inClass;
     for (;;) {
@@ -1199,6 +1207,7 @@ export default class Tokenizer extends LocationParser {
       chunkStart = this.state.pos;
     while (this.state.pos < this.input.length) {
       const ch = this.fullCharCodeAtPos();
+      console.log("readWord1", String.fromCharCode(ch));
       if (isIdentifierChar(ch)) {
         this.state.pos += ch <= 0xffff ? 1 : 2;
       } else if (ch === 92) {
@@ -1238,6 +1247,8 @@ export default class Tokenizer extends LocationParser {
   // words when necessary.
 
   readWord(): void {
+    console.log('readWord');
+    console.trace();
     const word = this.readWord1();
     let type = tt.name;
 

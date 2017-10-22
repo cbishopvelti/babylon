@@ -136,7 +136,12 @@ export default class ExpressionParser extends LValParser {
       failOnShorthandAssign = true;
     }
 
-    if (this.match(tt.parenL) || this.match(tt.name)) {
+    if (
+      this.match(tt.parenL) ||
+      this.match(tt.dollarL) ||
+      this.match(tt.name)
+    ) {
+      console.log("801.1");
       this.state.potentialArrowAt = this.state.start;
     }
 
@@ -317,6 +322,7 @@ export default class ExpressionParser extends LValParser {
             ? "LogicalExpression"
             : "BinaryExpression",
         );
+        console.log("expression.parseExprOp 001");
         return this.parseExprOp(
           node,
           leftStartPos,
@@ -326,6 +332,8 @@ export default class ExpressionParser extends LValParser {
         );
       }
     }
+    console.log("expression.parseExprOp 002");
+
     return left;
   }
 
@@ -422,6 +430,7 @@ export default class ExpressionParser extends LValParser {
     startLoc: Position,
     noCalls?: ?boolean,
   ): N.Expression {
+    console.log("parseSubscripts");
     const state = { stop: false };
     do {
       base = this.parseSubscript(base, startPos, startLoc, noCalls, state);
@@ -437,6 +446,8 @@ export default class ExpressionParser extends LValParser {
     noCalls: ?boolean,
     state: { stop: boolean },
   ): N.Expression {
+    console.log("parseSubscript", this.state.value);
+    console.log("this.state.match", this.match(tt.dollarL));
     if (!noCalls && this.eat(tt.doubleColon)) {
       const node = this.startNodeAt(startPos, startLoc);
       node.object = base;
@@ -466,7 +477,8 @@ export default class ExpressionParser extends LValParser {
         node.optional = true;
         this.expect(tt.bracketR);
         return this.finishNode(node, "MemberExpression");
-      } else if (this.eat(tt.parenL)) {
+      } else if (this.eat(tt.parenL) || this.eat(tt.dollarL)) {
+        console.log("901");
         const possibleAsync = this.atPossibleAsync(base);
 
         node.callee = base;
@@ -497,7 +509,14 @@ export default class ExpressionParser extends LValParser {
       node.computed = true;
       this.expect(tt.bracketR);
       return this.finishNode(node, "MemberExpression");
-    } else if (!noCalls && this.match(tt.parenL)) {
+    } else if (
+      !noCalls &&
+      (
+        this.match(tt.parenL) ||
+        this.match(tt.dollarL)
+      )
+    ) {
+      console.log("902");
       const possibleAsync = this.atPossibleAsync(base);
       this.next();
 
@@ -573,6 +592,8 @@ export default class ExpressionParser extends LValParser {
     possibleAsyncArrow: boolean,
     refTrailingCommaPos?: Pos,
   ): $ReadOnlyArray<?N.Expression> {
+    console.log("parseCallExpressionArguments");
+    console.trace();
     const elts = [];
     let innerParenStart;
     let first = true;
@@ -586,7 +607,11 @@ export default class ExpressionParser extends LValParser {
       }
 
       // we need to make sure that if this is an async arrow functions, that we don't allow inner parens inside the params
-      if (this.match(tt.parenL) && !innerParenStart) {
+      if (
+        (this.match(tt.parenL) || this.match(tt.dollarL)) &&
+        !innerParenStart
+      ) {
+        console.log("903")
         innerParenStart = this.state.start;
       }
 
@@ -637,6 +662,11 @@ export default class ExpressionParser extends LValParser {
     const canBeArrow = this.state.potentialArrowAt === this.state.start;
     let node;
 
+    console.log("expression.parseExprAtom", this.state.value);
+    if (this.state.value == 5) {
+      console.trace();
+    }
+
     switch (this.state.type) {
       case tt._super:
         if (
@@ -657,7 +687,7 @@ export default class ExpressionParser extends LValParser {
           this.unexpected();
         }
         if (
-          this.match(tt.parenL) &&
+          this.match(tt.parenL) ||
           this.state.inMethod !== "constructor" &&
           !this.options.allowSuperOutsideMethod
         ) {
@@ -761,6 +791,8 @@ export default class ExpressionParser extends LValParser {
       case tt._false:
         return this.parseBooleanLiteral();
 
+      case tt.dollarL:
+        console.log('904');
       case tt.parenL:
         return this.parseParenAndDistinguishExpression(canBeArrow);
 
@@ -837,6 +869,7 @@ export default class ExpressionParser extends LValParser {
   }
 
   parseFunctionExpression(): N.FunctionExpression | N.MetaProperty {
+    console.log("parseFunctionExpression")
     const node = this.startNode();
     const meta = this.parseIdentifier(true);
     if (this.state.inGenerator && this.eat(tt.dot)) {
@@ -916,7 +949,8 @@ export default class ExpressionParser extends LValParser {
   }
 
   parseParenExpression(): N.Expression {
-    this.expect(tt.parenL);
+    this.expect(tt.parenL) || this.expect(tt.dollarL);
+    console.log('905')
     const val = this.parseExpression();
     this.expect(tt.parenR);
     return val;
@@ -927,7 +961,10 @@ export default class ExpressionParser extends LValParser {
     const startLoc = this.state.startLoc;
 
     let val;
-    this.expect(tt.parenL);
+    // this.expect(tt.parenL);
+    console.log("201");
+    this.expect(tt.dollarL);
+    console.log("202");
 
     const innerStartPos = this.state.start;
     const innerStartLoc = this.state.startLoc;
@@ -1559,6 +1596,7 @@ export default class ExpressionParser extends LValParser {
     node: N.Function,
     isArrowFunction: ?boolean,
   ): void {
+    console.log('checkFunctionNameAndParams');
     // If this is a strict mode function, verify that argument names
     // are not repeated, and it does not try to bind the words `eval`
     // or `arguments`.
@@ -1603,6 +1641,7 @@ export default class ExpressionParser extends LValParser {
     allowEmpty?: boolean,
     refShorthandDefaultPos?: ?Pos,
   ): $ReadOnlyArray<?N.Expression> {
+    console.log('parseExprList');
     const elts = [];
     let first = true;
 
@@ -1625,6 +1664,7 @@ export default class ExpressionParser extends LValParser {
     refNeedsArrowPos: ?Pos,
     refTrailingCommaPos?: Pos,
   ): ?N.Expression {
+    console.log('parseExprListItem');
     let elt;
     if (allowEmpty && this.match(tt.comma)) {
       elt = null;

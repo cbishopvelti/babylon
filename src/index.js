@@ -11,11 +11,14 @@ import type { Expression, File } from "./types";
 import estreePlugin from "./plugins/estree";
 import flowPlugin from "./plugins/flow";
 import jsxPlugin from "./plugins/jsx";
+import dollarPlugin from "./plugins/dollar";
 import typescriptPlugin from "./plugins/typescript";
+
 plugins.estree = estreePlugin;
 plugins.flow = flowPlugin;
 plugins.jsx = jsxPlugin;
 plugins.typescript = typescriptPlugin;
+plugins.dollar = dollarPlugin;
 
 export function parse(input: string, options?: Options): File {
   return getParser(options, input).parse();
@@ -52,7 +55,12 @@ function getParserClass(
 
   // Filter out just the plugins that have an actual mixin associated with them.
   let pluginList = pluginsFromOptions.filter(
-    p => p === "estree" || p === "flow" || p === "jsx" || p === "typescript",
+    p =>
+      p === "estree" ||
+      p === "flow" ||
+      p === "jsx" ||
+      p === "typescript" ||
+      p === "dollar",
   );
 
   if (pluginList.indexOf("flow") >= 0) {
@@ -81,6 +89,7 @@ function getParserClass(
   }
 
   const key = pluginList.join("/");
+
   let cls = parserClassCache[key];
   if (!cls) {
     cls = Parser;
@@ -89,5 +98,6 @@ function getParserClass(
     }
     parserClassCache[key] = cls;
   }
+
   return cls;
 }

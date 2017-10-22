@@ -96,6 +96,7 @@ export const types: { [name: string]: TokenType } = {
   braceR: new TokenType("}"),
   braceBarR: new TokenType("|}"),
   parenL: new TokenType("(", { beforeExpr, startsExpr }),
+  dollarL: new TokenType("$", { beforeExpr, startsExpr }),
   parenR: new TokenType(")"),
   comma: new TokenType(",", { beforeExpr }),
   semi: new TokenType(";", { beforeExpr }),
