@@ -1,0 +1,1 @@
+const test = Math.random $ 5

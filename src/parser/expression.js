@@ -317,6 +317,7 @@ export default class ExpressionParser extends LValParser {
             ? "LogicalExpression"
             : "BinaryExpression",
         );
+
         return this.parseExprOp(
           node,
           leftStartPos,
@@ -326,6 +327,7 @@ export default class ExpressionParser extends LValParser {
         );
       }
     }
+
     return left;
   }
 
@@ -497,7 +499,7 @@ export default class ExpressionParser extends LValParser {
       node.computed = true;
       this.expect(tt.bracketR);
       return this.finishNode(node, "MemberExpression");
-    } else if (!noCalls && this.match(tt.parenL)) {
+    } else if (this.match(tt.parenL) && !noCalls) {
       const possibleAsync = this.atPossibleAsync(base);
       this.next();
 
