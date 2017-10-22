@@ -504,7 +504,6 @@ export default class ExpressionParser extends LValParser {
       this.expect(tt.bracketR);
       return this.finishNode(node, "MemberExpression");
     } else if (this.match(tt.parenL) && !noCalls) {
-      const isDollar = this.match(tt.dollarL);
       const possibleAsync = this.atPossibleAsync(base);
       this.next();
 
@@ -516,19 +515,11 @@ export default class ExpressionParser extends LValParser {
       // refNeedsArrowPos.
       const refTrailingCommaPos: Pos = { start: -1 };
 
-      if (isDollar) {
-        node.arguments = this.parseCallExpressionArguments(
-          tt.semi,
-          possibleAsync,
-          refTrailingCommaPos,
-        );
-      } else {
-        node.arguments = this.parseCallExpressionArguments(
-          tt.parenR,
-          possibleAsync,
-          refTrailingCommaPos,
-        );
-      }
+      node.arguments = this.parseCallExpressionArguments(
+        tt.parenR,
+        possibleAsync,
+        refTrailingCommaPos,
+      );
       this.finishCallExpression(node);
 
       if (possibleAsync && this.shouldParseAsyncArrow()) {
@@ -592,9 +583,7 @@ export default class ExpressionParser extends LValParser {
     let innerParenStart;
     let first = true;
 
-    const closeOnEol = close === tt.semi;
-
-    while (!this.eat(close) && !(closeOnEol && this.canInsertSemicolon())) {
+    while (!this.eat(close)) {
       if (first) {
         first = false;
       } else {
@@ -674,7 +663,7 @@ export default class ExpressionParser extends LValParser {
           this.unexpected();
         }
         if (
-          this.match(tt.parenL) ||
+          this.match(tt.parenL) &&
           this.state.inMethod !== "constructor" &&
           !this.options.allowSuperOutsideMethod
         ) {
