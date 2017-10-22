@@ -755,7 +755,6 @@ export default class StatementParser extends ExpressionParser {
       declarations.push(this.finishNode(decl, "VariableDeclarator"));
       if (!this.eat(tt.comma)) break;
     }
-    
     return node;
   }
 

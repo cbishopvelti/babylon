@@ -136,10 +136,7 @@ export default class ExpressionParser extends LValParser {
       failOnShorthandAssign = true;
     }
 
-    if (
-      this.match(tt.parenL) ||
-      this.match(tt.name)
-    ) {
+    if (this.match(tt.parenL) || this.match(tt.name)) {
       this.state.potentialArrowAt = this.state.start;
     }
 
@@ -482,7 +479,6 @@ export default class ExpressionParser extends LValParser {
         node.optional = true;
 
         return this.finishNode(node, "CallExpression");
-
       } else {
         node.object = base;
         node.property = this.parseIdentifier(true);

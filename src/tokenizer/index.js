@@ -230,7 +230,10 @@ export default class Tokenizer extends LocationParser {
   readToken(code: number): void {
     // Identifier or keyword. '\uXXXX' sequences are allowed in
     // identifiers, so '\' also dispatches to that.
-    if (isIdentifierStart(code) || code === 92 /* '\' */) {
+    if (
+      isIdentifierStart(code, this.hasPlugin("dollar")) ||
+      code === 92 /* '\' */
+    ) {
       this.readWord();
     } else {
       this.getTokenFromCode(code);
@@ -913,7 +916,7 @@ export default class Tokenizer extends LocationParser {
       }
     }
 
-    if (isIdentifierStart(this.fullCharCodeAtPos()))
+    if (isIdentifierStart(this.fullCharCodeAtPos(), this.hasPlugin("dollar")))
       this.raise(this.state.pos, "Identifier directly after number");
 
     if (isBigInt) {
@@ -965,7 +968,7 @@ export default class Tokenizer extends LocationParser {
       }
     }
 
-    if (isIdentifierStart(this.fullCharCodeAtPos()))
+    if (isIdentifierStart(this.fullCharCodeAtPos(), this.hasPlugin("dollar")))
       this.raise(this.state.pos, "Identifier directly after number");
 
     // remove "_" for numeric literal separator, and "n" for BigInts
@@ -1204,7 +1207,7 @@ export default class Tokenizer extends LocationParser {
       chunkStart = this.state.pos;
     while (this.state.pos < this.input.length) {
       const ch = this.fullCharCodeAtPos();
-      if (isIdentifierChar(ch)) {
+      if (isIdentifierChar(ch, this.hasPlugin("dollar"))) {
         this.state.pos += ch <= 0xffff ? 1 : 2;
       } else if (ch === 92) {
         // "\"
@@ -1224,7 +1227,14 @@ export default class Tokenizer extends LocationParser {
         ++this.state.pos;
         const esc = this.readCodePoint(true);
         // $FlowFixMe (thinks esc may be null, but throwOnInvalid is true)
-        if (!(first ? isIdentifierStart : isIdentifierChar)(esc, true)) {
+        if (
+          // $FlowFixMe
+          !(first ? isIdentifierStart : isIdentifierChar)(
+            // $FlowFixMe
+            esc, // $FlowFixMe
+            this.hasPlugin("dollar"),
+          )
+        ) {
           this.raise(escStart, "Invalid Unicode escape");
         }
 

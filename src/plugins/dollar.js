@@ -5,7 +5,6 @@ import type { Pos, Position } from "../util/location";
 
 export default (superClass: Class<Parser>): Class<Parser> =>
   class extends superClass {
-
     parseSubscript(
       base: N.Expression,
       startPos: number,
